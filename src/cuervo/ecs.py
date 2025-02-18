@@ -106,10 +106,13 @@ class ECS:
         self.entities: Set[int] = set()
         self._max_eid = 0
 
-        self.systems: dict[type[System], System] = {}
-        self.execution_order: list[list[type[System]]] = [[]]
         self.components: dict[type[Component], Component] = {}
+        self.resources: dict[type, Any] = {}
+
+        self.systems: dict[type[System], System] = {}
         self.setup_systems: list[type[System]] = []
+
+        self.execution_order: list[list[type[System]]] = [[]]
 
         self.rng = np.random.default_rng(seed=seed)
 
@@ -206,6 +209,28 @@ class ECS:
                     handler(*event.args, **event.kwargs)
             self.deferred_events = []
     
+    def add_resource(
+        self,
+        resource: Any,
+        override: bool = False
+    ):
+        """Adds a resource to the resources list.
+
+        Parameters
+        ----------
+        resource
+            the resource instance to add
+        
+        Raises
+        ------
+        KeyError
+            if the component already exists and override is not `True`
+        """
+        T = type(resource)
+        if T in self.resources and not override:
+            raise KeyError(f"Resource<{T.__name__}> has already been created!")
+        self.resources[T] = resource
+
     def add_component(
         self,
         component: Component,
