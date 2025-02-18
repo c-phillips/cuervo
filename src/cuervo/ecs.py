@@ -44,6 +44,10 @@ class ECS:
         a mapping between event names and their handlers
     rng: np.random.Generator
         a numpy random number generator, seeded by the `seed` passed on init
+    setup_systems
+        a list of system types that are pending a single run
+    resources
+        a mapping to access objects which don't manage entity state
 
     _wrapped_handlers: dict[type[System], dict[str, Callable]]
         a private mapping between systems and their mapped event handlers which
