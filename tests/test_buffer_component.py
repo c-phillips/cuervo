@@ -24,7 +24,7 @@ def test_buffer_component():
     ])
 
     # Use our initial data to batch-create some entities
-    ecs.new_entity(
+    ecs.add_entity(
         initial_values={
             Position: positions
         },
@@ -64,7 +64,7 @@ def test_buffer_component():
         "Remove multiple eids: active mask did not update correctly"
 
     # Validate that adding an entity will fill recently vacated slots first
-    ecs.new_entity(
+    ecs.add_entity(
         initial_values = {
             Position: np.array([9, 9, 9], dtype=np.float32)
         }
@@ -80,7 +80,7 @@ def test_buffer_component():
         "Add single back: active mask did not update correctly"
 
     # Validate that adding multiple entities will fill recently vacated slots
-    ecs.new_entity(
+    ecs.add_entity(
         initial_values = {
             Position: np.array([
                 [10, 10, 10],
