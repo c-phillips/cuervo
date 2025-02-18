@@ -10,30 +10,14 @@ import numpy as np
 import cuervo as cvo
 
 
-class EventCaller:
-    def __init__(self, ecs: cvo.ECS):
-        self.ecs = ecs
+class SetupSystem(cvo.System):  
+    setup = True
+    def process(self):
+        self.logger.info("Runs just once!")
 
-    def trigger(self, event: str, *args, **kwargs):
-        self.ecs.trigger(event, *args, **kwargs)
-
-
-class DummySystem(cvo.System):    
     @cvo.ECS.connect("test_event")
-    def test_event_handler(self, ecs: cvo.ECS, **kwargs):
-        self.logger.info(kwargs)
-
-
-class AnotherDummySystem(cvo.System):    
-    @cvo.ECS.connect("test_event")
-    def test_event_handler(self, option, **event):
-        self.logger.info("within another dummy handler")
-
-
-def test_event_handler(ecs: cvo.ECS, **kwargs):
-    logger = logging.getLogger("example.test_handler")
-    entities = ecs.components[State].entities
-    logger.info(f"Found {len(entities)} entities with a State component")
+    def test_event_handler(self):
+        self.logger.info("events still trigger though")
 
 
 class State(cvo.Component):
@@ -56,12 +40,8 @@ def main():
 
     ecs = cvo.ECS()
 
-    eventer = EventCaller(ecs)
-    ecs.connect("test_event", test_event_handler)
-
     ecs.add_system(MovementSystem)
-    ecs.add_system(DummySystem)
-    ecs.add_system(AnotherDummySystem)
+    ecs.add_system(SetupSystem)
 
     ecs.add_entity(
         systems=[MovementSystem],
@@ -72,8 +52,6 @@ def main():
     )
     logger.info("Starting loop")
 
-    eventer.trigger("test_event", option="an option")
-    eventer.trigger("test_event", option="deferred event", defer=True)
 
     start_time = time.process_time()
     dt = 0.1
@@ -85,6 +63,9 @@ def main():
         )
         t += dt
     total_time = time.process_time() - start_time
+
+    ecs.trigger("test_event")
+
     logger.info(f"Done! Took {total_time:0.6}s")
 
 if __name__ == "__main__":

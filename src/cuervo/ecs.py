@@ -84,6 +84,7 @@ class ECS:
         self.systems: dict[type[System], System] = {}
         self.execution_order: list[list[type[System]]] = [[]]
         self.components: dict[type[Component], Component] = {}
+        self.setup_systems: list[type[System]] = []
 
         self.rng = np.random.default_rng(seed=seed)
 
@@ -163,6 +164,11 @@ class ECS:
         arguments. After each system finishes processing deferred
         [events](events.md) are triggered.
         """
+        if self.setup_systems:
+            while self.setup_systems:
+                system = self.systems.pop(self.setup_systems.pop())
+                system(*args, **kwargs)
+
         for priority_level in self.execution_order:
             for system_cls in priority_level:
                 system = self.systems[system_cls]
@@ -242,9 +248,12 @@ class ECS:
                 handler = getattr(self.systems[system_cls], handler_name)
                 self.connect(event, handler)
 
-        while priority > (len(self.execution_order)-1):
-            self.execution_order.extend([[]*(priority - len(self.execution_order) + 1)])
-        self.execution_order[priority].append(system_cls)
+        if system_cls.setup:
+            self.setup_systems.append(system_cls)
+        else:
+            while priority > (len(self.execution_order)-1):
+                self.execution_order.extend([[]*(priority - len(self.execution_order) + 1)])
+            self.execution_order[priority].append(system_cls)
 
     def deregister_entity(self, system_cls: type[System], eids: int | Iterable[int]):
         """Remove an entity from being processed by the provided system

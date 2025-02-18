@@ -42,6 +42,9 @@ class System:
         a set of the components required to fulfill the requirements of the
         system's `process` method's parameters
     
+    setup: bool
+        if `True` run the process method only once
+    
 
     Examples
     --------
@@ -50,6 +53,8 @@ class System:
     _call_args: dict[str, type] = None
     _call_arg_map: dict[type, str] = None
     _required_components: Set[type[Component]] = None
+
+    setup: bool = False
 
     def __init__(
         self,
