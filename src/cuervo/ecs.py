@@ -38,7 +38,7 @@ class ECS:
     components: dict[type[Component], Component]
         a mapping between component types and the component instances
     deferred_events: list[Event]
-        a list of [`Event`][raven.ecs.ECS.Event] objects which have been stored
+        a list of [`Event`][cuervo.ecs.ECS.Event] objects which have been stored
         for evaluation after all systems have finished processing
     handlers: dict[str, list[Callable]]
         a mapping between event names and their handlers
@@ -50,6 +50,31 @@ class ECS:
         were decorated with the `ECS.connect` function
     _max_eid: int
         a private integer which increments whenever a new entity is created
+    
+
+    Examples
+    --------
+    To create an ECS, just initialize this class (with an optional rng seed):
+    >>> ecs = cuervo.ECS()
+
+    You can add systems using the `ECS.add_system` method, and components can
+    be either added using `ECS.add_component` *or* implicitly by adding a new
+    entity with that component already defined.
+    >>> ecs.add_system(MySystem)
+    ... ecs.add_component(ExampleComp)
+    ... ecs.add_entity(
+    ...     systems = [MySystem],
+    ...     initial_values = {
+    ...         AnotherComp: ecs.rng.uniform(),
+    ...         ExampleComp: ecs.rng.uniform()
+    ...     }
+    ... )
+    You can see that while the component `AnotherComp` wasn't already added, it
+    will still be created because an initial value was provided.
+
+    There is an exception to this however: `BufferComponent`s are required to
+    be pre-initialized.
+
     """
 
     def make_connect_decorator():

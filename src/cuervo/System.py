@@ -27,7 +27,7 @@ class System:
     ----------
     logger: logging.Logger
         a logger for all your logging needs
-    ecs: raven.ecs.ECS
+    ecs: cuervo.ecs.ECS
         the ECS to which this system is registered
     registered_eids: Set[int]
         a set of registered unique entity ids
@@ -48,7 +48,19 @@ class System:
 
     Examples
     --------
+    Lets consider an example where we have a joint 2D position and velocity 
+    component that we would like to update on each time-step:
+    >>> class State(Component):
+    ...     shape = (4,)
 
+    >>> class StateUpdate(System):
+    ...     def process(
+    ...        self, 
+    ...        states: State,
+    ...        timedelta: float
+    ...     ):
+    ...         states[:,:2] += states[:,2:] * timedelta
+    ...         self.update_component(State, states)
     """
     _call_args: dict[str, type] = None
     _call_arg_map: dict[type, str] = None
